@@ -1,4 +1,8 @@
 import Express from 'express';
+import { MongoClient } from 'mongodb';
+
+const stringConexion="mongodb+srv://dmin:Admin2021@proyectociclo3.rjx9p.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+const client = new MongoClient(stringConexion, {useNewUrlParser: true,useUnifiedTopology: true,});
 
 const app = Express()
 app.use(Express.json())
@@ -34,6 +38,18 @@ app.post('/productos/nuevo', (req, res) => {
      }
     });
 
-app.listen(4000, () => {
-    console.log('Escuchando en el puerto 4000')
-});
+    
+const main = () => {
+    client.connect((err, db) => {
+        if (err) {
+            console.error('Error al conectar a la BD');
+        }
+        const conexion = db.db('ciclo3');
+        return app.listen(4000, () => {
+            console.log('Escuchando en el puerto 4000');
+        });
+    });
+
+};
+
+main();
