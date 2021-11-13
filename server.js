@@ -57,7 +57,7 @@ app.post('/productos/nuevo', (req, res) => {
     } catch {
         res.sendStatus(500);
      }
-    });
+ });
 
  app.patch('/productos/editar', (req, res) => {
      const edicion = req.body;
@@ -76,7 +76,23 @@ app.post('/productos/nuevo', (req, res) => {
              res.sendStatus(200);
         }
      });
- })
+ });
+
+ app.delete('/productos/eliminar', (req, res) => {
+
+     const filtro = {_id: new ObjectId (req.body.id)};
+     BaseMongo.collection('producto').deleteOne(filtro,(err, result)=>{
+
+        if (err){
+            console.error('Error eliminando el producto', err);
+            res.sendStatus(500);
+        }else {
+            console.log('Actualizado con éxito')
+             res.sendStatus(200);
+        }
+     })
+ });
+
 const main = () => {
     client.connect((err, db)=>{
         if (err) {
