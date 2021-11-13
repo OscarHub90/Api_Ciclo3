@@ -1,35 +1,56 @@
 import Express from 'express';
 import { MongoClient } from 'mongodb';
+import Cors from 'cors';
 
-const stringConexion="mongodb+srv://dmin:Admin2021@proyectociclo3.rjx9p.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
-const client = new MongoClient(stringConexion, {useNewUrlParser: true,useUnifiedTopology: true,});
+const stringBaseMongo=
+'mongodb+srv://admin:admin2021@bdciclo3.kzs5u.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
 
+const client = new MongoClient(stringBaseMongo, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+let BaseMongo; 
 const app = Express()
 app.use(Express.json())
+app.use(Cors());
 
 app.get('/productos', (req, res) => {
     console.log("Se hizo una llamada a /productos");
-    const productos = [
-    {id:"001", nombre:"cama", valor:"20.000", estado:"activo",},
-    {id:"002", nombre:"mesa", valor:"100.000", estado:"activo",}
+    BaseMongo
+    .collection('producto')
+    .find({})
+    .limit(100)
+    .toArray((err,result) => {
+        if (err){
+         res.status(500).send('Error al consultar los productos')
+        }else {
+          res.json(result);
+    }
+});
 
-];
-res.send(productos);
 });
 
 app.post('/productos/nuevo', (req, res) => {
-    // Acá va el código para crear el producto
     const datosProductos = req.body;
     console.log('llaves: ', Object.keys(datosProductos));
     try {
-        
         if (
             Object.keys(datosProductos).includes('id') &&
             Object.keys(datosProductos).includes('nombre') &&
             Object.keys(datosProductos).includes('valor')  &&
             Object.keys(datosProductos).includes('estado')
         ) {
-            res.sendStatus(200);
+           BaseMongo.collection('producto').insertOne(datosProductos, (err, result) => {
+                if (err){
+                    console.error(err);
+                    res.sendStatus(500);
+                }else {
+                    console.log(result)
+                     res.sendStatus(200);
+                }
+            });
+
         } else {
             res.sendStatus(500);
         }
@@ -38,15 +59,16 @@ app.post('/productos/nuevo', (req, res) => {
      }
     });
 
-    
+ 
 const main = () => {
-    client.connect((err, db) => {
+    client.connect((err, db)=>{
         if (err) {
-            console.error('Error al conectar a la BD');
+            console.error('Error al conectar a la Base de datos');
         }
-        const conexion = db.db('ciclo3');
-        return app.listen(4000, () => {
-            console.log('Escuchando en el puerto 4000');
+        BaseMongo = db.db('tienda');
+        console.log('conexión exitosa!');
+        return app.listen(5000, () => {
+            console.log('Escuchando en el puerto 5000');
         });
     });
 
