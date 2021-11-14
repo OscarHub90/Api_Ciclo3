@@ -1,52 +1,24 @@
 import Express from 'express'
-import { conectarBD, getDB } from '../../db/db.js';
+import { queryProductos, crearProducto } from '../../controllers/productos/controller.js';
+import { getDB } from '../../db/db.js';
 
 const rutasProducto = Express.Router();
 
+const genericCallback = (res) => (err, result) => {
+    if (err) {
+      res.status(500).send('Error!');
+    } else {
+        res.json(result);
+    }
+};
+
 rutasProducto.route('/productos').get((req, res) => {
     console.log("Se hizo una llamada a /productos");
-    const BaseMongo = getDB();
-    BaseMongo
-    .collection('producto')
-    .find({})
-    .limit(100)
-    .toArray((err,result) => {
-        if (err){
-         res.status(500).send('Error al consultar los productos')
-        }else {
-          res.json(result);
-    }
-});
-
+    const responseProductos = queryProductos (genericCallback(res));
 });
 
 rutasProducto.route('/productos/nuevo').post((req, res) => {
-    const datosProductos = req.body;
-    console.log('llaves: ', Object.keys(datosProductos));
-    try {
-        if (
-            Object.keys(datosProductos).includes('codigo') &&
-            Object.keys(datosProductos).includes('nombre') &&
-            Object.keys(datosProductos).includes('valor')  &&
-            Object.keys(datosProductos).includes('estado')
-        ) {
-            const BaseMongo = getDB();
-           BaseMongo.collection('producto').insertOne(datosProductos, (err, result) => {
-                if (err){
-                    console.error(err);
-                    res.sendStatus(500);
-                }else {
-                    console.log(result)
-                     res.sendStatus(200);
-                }
-            });
-
-        } else {
-            res.sendStatus(500);
-        }
-    } catch {
-        res.sendStatus(500);
-     }
+    crearProducto(req.body, genericCallback(res));
  });
 
  rutasProducto.route('/productos/editar').patch((req, res) => {
