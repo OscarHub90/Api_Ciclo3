@@ -1,22 +1,17 @@
 import Express from 'express';
-import { MongoClient, ObjectId } from 'mongodb';
+import dotenv from 'dotenv';
 import Cors from 'cors';
+import { conectarBD, getDB } from './db/db.js';
 
-const stringBaseMongo=
-'mongodb+srv://admin:admin2021@bdciclo3.kzs5u.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+dotenv.config({ path: './.env'})
 
-const client = new MongoClient(stringBaseMongo, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
-
-let BaseMongo; 
 const app = Express()
 app.use(Express.json())
 app.use(Cors());
 
 app.get('/productos', (req, res) => {
     console.log("Se hizo una llamada a /productos");
+    const BaseMongo = getDB();
     BaseMongo
     .collection('producto')
     .find({})
@@ -41,6 +36,7 @@ app.post('/productos/nuevo', (req, res) => {
             Object.keys(datosProductos).includes('valor')  &&
             Object.keys(datosProductos).includes('estado')
         ) {
+            const BaseMongo = getDB();
            BaseMongo.collection('producto').insertOne(datosProductos, (err, result) => {
                 if (err){
                     console.error(err);
@@ -67,6 +63,7 @@ app.post('/productos/nuevo', (req, res) => {
      const operacion = {
          $set:edicion
      }
+     const BaseMongo = getDB();
      BaseMongo.collection('producto').findOneAndUpdate(filtro, operacion, { upsert: true, returOriginal: true}, (err, result) => {
         if (err){
             console.error('Error actualizando el producto', err);
@@ -81,6 +78,7 @@ app.post('/productos/nuevo', (req, res) => {
  app.delete('/productos/eliminar', (req, res) => {
 
      const filtro = {_id: new ObjectId (req.body.id)};
+     const BaseMongo = getDB();
      BaseMongo.collection('producto').deleteOne(filtro,(err, result)=>{
 
         if (err){
@@ -91,20 +89,12 @@ app.post('/productos/nuevo', (req, res) => {
              res.sendStatus(200);
         }
      })
- });
+ })
 
 const main = () => {
-    client.connect((err, db)=>{
-        if (err) {
-            console.error('Error al conectar a la Base de datos');
-        }
-        BaseMongo = db.db('tienda');
-        console.log('conexión exitosa!');
-        return app.listen(5000, () => {
-            console.log('Escuchando en el puerto 5000');
-        });
+    app.listen(process.env.PORT, () => {
+        console.log(`Escuchando en el puerto ${process.env.PORT}`);
     });
-
 };
 
-main();
+conectarBD(main);
