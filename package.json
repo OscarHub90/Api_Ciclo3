@@ -9,10 +9,16 @@
   "scripts": {
     "start": "nodemon server.js"
   },
+  "engines": {
+    "node": "14.x"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "express-jwt": "^6.1.0",
+    "express-jwt-authz": "^2.4.1",
     "express-oauth2-jwt-bearer": "^1.0.1",
+    "jwks-rsa": "^2.0.5",
     "mongodb": "^4.1.4"
   },
   "devDependencies": {
