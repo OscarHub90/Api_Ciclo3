@@ -102,6 +102,50 @@ app.post('/productos/nuevo', (req, res) => {
      }
  });
 
+ app.get('/ventas', (req, res) => {
+    console.log("Se hizo una llamada a /ventas");
+    BaseMongo
+    .collection('ventas')
+    .find({})
+    .limit(100)
+    .toArray((err,result) => {
+        if (err){
+         res.status(500).send('Error al consultar las ventas')
+        }else {
+          res.json(result);
+    }
+});
+
+});
+
+app.post('/ventas/nueva', (req, res) => {
+    const datosVentas = req.body;
+    console.log('llaves: ', Object.keys(datosVentas));
+    try {
+        if (
+            Object.keys(datosVentas).includes('vendedor') &&
+            Object.keys(datosVentas).includes('producto') &&
+            Object.keys(datosVentas).includes('cantidad')  &&
+            Object.keys(datosVentas).includes('precio')
+        ) {
+           BaseMongo.collection('ventas').insertOne(datosVentas, (err, result) => {
+                if (err){
+                    console.error(err);
+                    res.sendStatus(500);
+                }else {
+                    console.log(result)
+                     res.sendStatus(200);
+                }
+            });
+
+        } else {
+            res.sendStatus(500);
+        }
+    } catch {
+        res.sendStatus(500);
+     }
+ });
+
 
  app.patch('/productos/editar', (req, res) => {
      const edicion = req.body;
@@ -141,7 +185,27 @@ app.post('/productos/nuevo', (req, res) => {
     });
 });
 
- app.delete('/productos/eliminar', (req, res) => {
+app.patch('/ventas/editar', (req, res) => {
+    const edicion = req.body;
+    console.log(edicion);
+    const filtro = {_id: new ObjectId (edicion.id)};
+    delete edicion.id
+    const operacion = {
+        $set:edicion
+    }
+    BaseMongo.collection('ventas').findOneAndUpdate(filtro, operacion, { upsert: true, returOriginal: true}, (err, result) => {
+       if (err){
+           console.error('Error actualizando La venta', err);
+           res.sendStatus(500);
+       }else {
+           console.log('Actualizado con éxito')
+            res.sendStatus(200);
+       }
+    });
+});
+
+
+app.delete('/productos/eliminar', (req, res) => {
 
     const filtro = {_id: new ObjectId (req.body.id)};
     BaseMongo.collection('producto').deleteOne(filtro,(err, result)=>{
@@ -163,6 +227,22 @@ app.delete('/usuarios/eliminar', (req, res) => {
 
        if (err){
            console.error('Error eliminando el usuario', err);
+           res.sendStatus(500);
+       }else {
+           console.log('Actualizado con éxito')
+            res.sendStatus(200);
+       }
+    })
+});
+
+
+app.delete('/ventas/eliminar', (req, res) => {
+
+    const filtro = {_id: new ObjectId (req.body.id)};
+    BaseMongo.collection('ventas').deleteOne(filtro,(err, result)=>{
+
+       if (err){
+           console.error('Error eliminando la venta', err);
            res.sendStatus(500);
        }else {
            console.log('Actualizado con éxito')
