@@ -1,9 +1,13 @@
 import Express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import Cors from 'cors';
+import dotenv from 'dotenv';
 
-const stringBaseMongo=
-'mongodb+srv://admin:admin2021@bdciclo3.kzs5u.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
+
+dotenv.config({ path: './.env'})
+const stringBaseMongo= process.env.DATABASE_URL;
+
+const port = process.env.PORT || 5000;
 
 const client = new MongoClient(stringBaseMongo, {
     useNewUrlParser: true,
@@ -258,8 +262,8 @@ const main = () => {
         }
         BaseMongo = db.db('tienda');
         console.log('conexión exitosa!');
-        return app.listen(5000, () => {
-            console.log('Escuchando en el puerto 5000');
+        return app.listen(port, () => {
+            console.log(`Escuchando en el puerto ${port}`);
         });
     });
 
