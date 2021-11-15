@@ -6,15 +6,14 @@ const rutasProducto = Express.Router();
 
 const genericCallback = (res) => (err, result) => {
     if (err) {
-      res.status(500).send('Error!');
-    } else {
+        res.status(500).send(err);
+      } else {
         res.json(result);
-    }
-};
+      }
+    };
 
 rutasProducto.route('/productos').get((req, res) => {
-    console.log("Se hizo una llamada a /productos");
-    const responseProductos = queryProductos (genericCallback(res));
+    queryProductos (genericCallback(res));
 });
 
 rutasProducto.route('/productos/nuevo').post((req, res) => {

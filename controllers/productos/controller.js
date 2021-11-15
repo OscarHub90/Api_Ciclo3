@@ -3,11 +3,12 @@ import { getDB } from '../../db/db.js';
 
 const queryProductos = async (callback) => {
     const BaseMongo = getDB();
-    await BaseMongo.collection('producto').find({}).limit(100).toArray(callback);
+    await BaseMongo.collection('producto').find().limit(100).toArray(callback);
 };
 
 const crearProducto = async (datosProductos, callback) => {
-
+  const baseDeDatos = getDB();
+  console.log('llaves: ', Object.keys(datosProductos));
         if (
             Object.keys(datosProductos).includes('codigo') &&
             Object.keys(datosProductos).includes('nombre') &&
